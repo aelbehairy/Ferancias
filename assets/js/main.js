@@ -3296,13 +3296,85 @@ function showFerialLesson(id, btn){
   }
 }
 
+var b2ExamSubjects = null;
+
+function renderB2ExamSubject(item){
+  var arabicMode = false;
+  var html = '<div class="b2-exam-sujet-header"><span class="learning-card-icon">' + item.number + '</span><div><span class="card-label">Sujet ' + item.number + '</span><h2>' + escapeHtml(item.title) + '</h2></div></div>';
+  String(item.content || '').split(/\r?\n/).forEach(function(rawLine){
+    var line = rawLine.trim();
+    if(!line || /^_+$/.test(line) || line === '🗣️ Texte en français') return;
+    if(line.indexOf('🇸🇦') === 0){
+      arabicMode = true;
+      html += '<div class="b2-exam-language-title" dir="rtl">' + escapeHtml(line) + '</div>';
+      return;
+    }
+    if(/^\d+\.\s/.test(line)){
+      html += '<h3 class="b2-exam-part-title">' + escapeHtml(line) + '</h3>';
+      return;
+    }
+    if(/^Nombre de mots\s*:/.test(line)){
+      html += '<div class="b2-exam-word-count">' + escapeHtml(line) + '</div>';
+      return;
+    }
+    if(line.indexOf('✅') === 0){
+      html += '<h3 class="b2-exam-connectors-title" dir="rtl">' + escapeHtml(line) + '</h3>';
+      return;
+    }
+    if(line.indexOf('•') === 0){
+      html += '<span class="b2-exam-connector">' + escapeHtml(line.replace(/^•\s*/, '')) + '</span>';
+      return;
+    }
+    if(arabicMode && /^(المقدمة|المميزات|العيوب|رأيي|الخاتمة)$/.test(line)){
+      html += '<h3 class="b2-exam-part-title b2-exam-ar-title" dir="rtl">' + escapeHtml(line) + '</h3>';
+      return;
+    }
+    if(arabicMode){
+      html += '<p class="b2-exam-paragraph b2-exam-arabic" dir="rtl">' + escapeHtml(line) + '</p>';
+    } else {
+      html += '<div class="b2-exam-speech-paragraph"><button class="tcf-sujet-play-btn grammar-speech-btn b2-exam-play-btn" type="button" onclick="speakB2ExamParagraph(this,event)" aria-label="Play this paragraph">' + actionIcon('play') + '<strong>Play</strong></button><p class="b2-exam-paragraph">' + escapeHtml(line) + '</p></div>';
+    }
+  });
+  return html;
+}
+
+function speakB2ExamParagraph(btn, event){
+  var row = btn && btn.closest ? btn.closest('.b2-exam-speech-paragraph') : null;
+  var paragraph = row ? row.querySelector('.b2-exam-paragraph') : null;
+  if(paragraph) speakGrammarText(paragraph, btn, event);
+}
+
+async function showB2ExamSujet(id, btn){
+  document.querySelectorAll('#b2-exam .b2-exam-sujet-grid .learning-card').forEach(function(card){
+    card.classList.toggle('active', card === btn);
+  });
+  var host = document.getElementById('b2-exam-sujet-content');
+  if(!host) return;
+  host.hidden = false;
+  host.innerHTML = '<div class="note">Chargement du sujet…</div>';
+  try{
+    if(!b2ExamSubjects){
+      var response = await fetch('./assets/data/b2-exam-subjects.json?v=20260726');
+      if(!response.ok) throw new Error('HTTP ' + response.status);
+      b2ExamSubjects = await response.json();
+    }
+    var item = b2ExamSubjects.filter(function(subject){ return subject.id === id; })[0];
+    if(!item) throw new Error('Sujet introuvable');
+    host.innerHTML = renderB2ExamSubject(item);
+    setTimeout(function(){ host.scrollIntoView({behavior:'smooth', block:'start'}); }, 20);
+  } catch(error){
+    host.innerHTML = '<div class="note">Impossible de charger ce sujet. Veuillez réessayer.</div>';
+  }
+}
+
 function showFerialSujet(lessonId, sujetId, btn){
   if(arguments.length === 2){
     btn = sujetId;
     sujetId = lessonId;
     lessonId = 'lecon4';
   }
-  var rootId = 'ferial-' + lessonId;
+  var isB2Copy = btn && btn.closest && btn.closest('#panel-b2');
+  var rootId = (isB2Copy ? 'b2-ferial-' : 'ferial-') + lessonId;
   var root = document.getElementById(rootId);
   if(!root) return;
   root.querySelectorAll('.ferial-sujet-panel').forEach(function(panel){
@@ -3316,6 +3388,21 @@ function showFerialSujet(lessonId, sujetId, btn){
     pill.setAttribute('aria-selected', active ? 'true' : 'false');
   });
 }
+
+function copyFerialContentToB2(){
+  document.querySelectorAll('#panel-b2 [data-ferial-source]').forEach(function(target){
+    var lessonId = target.getAttribute('data-ferial-source');
+    var source = document.getElementById('ferial-' + lessonId);
+    if(!source) return;
+    target.id = 'b2-ferial-' + lessonId;
+    target.className = 'b2-ferial-content ' + source.className + ' visible-anim';
+    target.innerHTML = source.innerHTML;
+    target.querySelectorAll('[id^="ferial-"]').forEach(function(node){
+      node.id = 'b2-' + node.id;
+    });
+  });
+}
+
 
 var pronunciationRecognition = null;
 var pronunciationStoppedByUser = false;
@@ -5662,7 +5749,7 @@ function speakGrammarText(target, button, event, keepActive){
   utterance.lang = 'fr-FR';
   utterance.rate = grammarSpeech.speed;
   utterance.pitch = 1;
-  var frenchVoice = typeof getTcfEcritFrenchVoice === 'function' ? getTcfEcritFrenchVoice() : null;
+  var frenchVoice = typeof getTcfEcritSelectedSpeechVoice === 'function' ? getTcfEcritSelectedSpeechVoice() : (typeof getTcfEcritFrenchVoice === 'function' ? getTcfEcritFrenchVoice() : null);
   if(frenchVoice) utterance.voice = frenchVoice;
   utterance.onend = function(){
     if(grammarSpeech.utterance === utterance) stopGrammarSpeech();
@@ -5736,7 +5823,7 @@ function addGrammarSpeechButtons(){
 }
 
 function initFerialSpeechLines(){
-  document.querySelectorAll('#o-ferial .fr-text').forEach(function(block){
+  document.querySelectorAll('#o-ferial .fr-text, #panel-b2 .b2-ferial-content .fr-text').forEach(function(block){
     var speechLines = [];
     Array.prototype.slice.call(block.querySelectorAll(':scope > .fr-line')).forEach(function(line, index){
       if(line.dataset.ferialSpeechReady === 'true') return;
@@ -5782,6 +5869,7 @@ function initFerialSpeechLines(){
   updateGrammarSpeechButtons();
 }
 
+copyFerialContentToB2();
 addTcfOralSpeechButtons();
 addTcfEcritAudioButtons();
 collapseTcfConsignesQuestionsByDefault();

@@ -4964,7 +4964,8 @@ body.learning-content-hidden .panel .main {
   }
 }
 
-#o-ferial .ferial-lieux-card {
+#o-ferial .ferial-lieux-card,
+#panel-b2 .b2-ferial-content .ferial-lieux-card {
   counter-reset: ferial-lieu;
 }
 #o-ferial .ferial-lesson-tabs {
@@ -5040,13 +5041,15 @@ body.learning-content-hidden .panel .main {
 #o-ferial .ferial-lesson-panel[hidden] {
   display: none;
 }
-#o-ferial .ferial-lieux-card h3 {
+#o-ferial .ferial-lieux-card h3,
+#panel-b2 .b2-ferial-content .ferial-lieux-card h3 {
   counter-increment: ferial-lieu;
   display: flex;
   align-items: center;
   gap: 10px;
 }
-#o-ferial .ferial-lieux-card h3::before {
+#o-ferial .ferial-lieux-card h3::before,
+#panel-b2 .b2-ferial-content .ferial-lieux-card h3::before {
   content: counter(ferial-lieu, decimal-leading-zero);
   width: 36px;
   height: 36px;
@@ -5062,23 +5065,27 @@ body.learning-content-hidden .panel .main {
   flex: 0 0 36px;
 }
 
-#o-ferial .ferial-speech-line {
+#o-ferial .ferial-speech-line,
+#panel-b2 .b2-ferial-content .ferial-speech-line {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 10px;
 }
-#o-ferial .ferial-line-role {
+#o-ferial .ferial-line-role,
+#panel-b2 .b2-ferial-content .ferial-line-role {
   color: #dc2626;
   font-family: "Fira Code", monospace;
   font-size: 13px;
   font-weight: 400;
 }
-#o-ferial .ferial-line-text {
+#o-ferial .ferial-line-text,
+#panel-b2 .b2-ferial-content .ferial-line-text {
   min-width: 0;
 }
 @media (max-width: 640px) {
-  #o-ferial .ferial-speech-line {
+  #o-ferial .ferial-speech-line,
+  #panel-b2 .b2-ferial-content .ferial-speech-line {
     grid-template-columns: auto 1fr;
   }
 }
@@ -6753,4 +6760,115 @@ body.pron-listening-open {
     justify-content: center;
     margin-left: 0;
   }
+}
+
+.b2-exam-sujet-content {
+  margin-top: 24px;
+  padding: clamp(20px, 4vw, 34px);
+  border: 1px solid #dbeafe;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: var(--shadow-md);
+  scroll-margin-top: 120px;
+}
+.b2-exam-sujet-content[hidden] {
+  display: none;
+}
+.b2-exam-sujet-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 18px;
+  margin-bottom: 22px;
+  border-bottom: 2px solid #dbeafe;
+}
+.b2-exam-sujet-header h2 {
+  margin: 5px 0 0;
+  color: #0f172a;
+  font-size: clamp(22px, 3vw, 30px);
+  line-height: 1.2;
+}
+.b2-exam-part-title {
+  margin: 24px 0 10px;
+  padding: 10px 14px;
+  border-left: 4px solid var(--blue);
+  border-radius: 8px;
+  background: var(--blue-light);
+  color: #1e3a8a;
+  font-size: 18px;
+}
+.b2-exam-paragraph {
+  margin: 0 0 13px;
+  color: #25324a;
+  font-size: 16px;
+  line-height: 1.85;
+}
+.b2-exam-word-count {
+  display: inline-flex;
+  margin: 12px 0 4px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #047857;
+  font-weight: 800;
+}
+.b2-exam-language-title {
+  margin: 30px 0 12px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-family: "Tajawal", sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+}
+.b2-exam-ar-title {
+  border-left: 0;
+  border-right: 4px solid #f59e0b;
+  background: #fffbeb;
+  color: #92400e;
+  font-family: "Tajawal", sans-serif;
+}
+.b2-exam-arabic {
+  font-family: "Tajawal", sans-serif;
+  font-size: 17px;
+  line-height: 2;
+}
+.b2-exam-connectors-title {
+  margin: 26px 0 12px;
+  color: #166534;
+  font-family: "Tajawal", sans-serif;
+  font-size: 18px;
+}
+.b2-exam-connector {
+  display: inline-flex;
+  margin: 4px 5px 4px 0;
+  padding: 7px 11px;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 14px;
+  font-weight: 800;
+}
+.b2-exam-speech-paragraph {
+  position: relative;
+  margin: 0 0 16px;
+  padding: 16px 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+.b2-exam-speech-paragraph .b2-exam-paragraph {
+  margin: 12px 0 0;
+}
+.b2-exam-play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.b2-exam-play-btn.is-playing {
+  border-color: #dc2626 !important;
+  color: #dc2626;
+  background: #fef2f2;
 }

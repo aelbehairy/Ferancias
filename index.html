@@ -16,7 +16,7 @@
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&amp;family=Fira+Code:wght@400;500&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./assets/css/styles.css">
+<link rel="stylesheet" href="./assets/css/styles.css?v=20260726-b2-exam-speech">
 <link rel="stylesheet" href="./assets/css/pronunciation.css">
 </head>
 <body class="learning-content-hidden">
@@ -3563,10 +3563,10 @@
       <button class="pill" data-grammar-mode="b2" onclick="showGrammarChild('b2',this)">B2</button>
     </div>
     <div class="nav-pills nested-child-tabs" id="pills-b1">
-      <button class="pill active" onclick="showSec('lecon1',this,'b1')"><span class="pi">1</span>Leçon 1</button>
-      <button class="pill" onclick="showSec('lecon2',this,'b1')"><span class="pi">2</span>Leçon 2</button>
-      <button class="pill" onclick="showSec('lecon3',this,'b1')"><span class="pi">3</span>Leçon 3</button>
-      <button class="pill" onclick="showSec('lecon4',this,'b1')"><span class="pi">4</span>Leçon 4</button>
+      <button class="pill active" onclick="showSec('lecon1',this,'b1')"><span class="pi">1</span>Leçon 1 Ferial</button>
+      <button class="pill" onclick="showSec('lecon2',this,'b1')"><span class="pi">2</span>Leçon 2 Manal</button>
+      <button class="pill" onclick="showSec('lecon3',this,'b1')"><span class="pi">3</span>Leçon 3 Manal</button>
+      <button class="pill" onclick="showSec('lecon4',this,'b1')"><span class="pi">4</span>Leçon 4 Manal</button>
       <button class="pill" data-learning-key="Devoir1" onclick="showSec('lecon1',this,'b1');setTimeout(function(){var devoir=document.getElementById('b1-Devoir1');if(devoir) devoir.scrollIntoView({behavior:'smooth',block:'start'});},80)"><span class="pi">D1</span>Devoir 1</button>
     </div>
   </nav>
@@ -5371,40 +5371,65 @@
       <button class="pill active" data-grammar-mode="b2" onclick="showGrammarChild('b2',this)">B2</button>
     </div>
     <div class="nav-pills nested-child-tabs" id="pills-b2">
-      <button class="pill active" onclick="showSec('lecon1',this,'b2')"><span class="pi">1</span>Leçon 1</button>
-      <button class="pill" onclick="showSec('lecon2',this,'b2')"><span class="pi">2</span>Leçon 2</button>
-      <button class="pill" onclick="showSec('lecon3',this,'b2')"><span class="pi">3</span>Leçon 3</button>
-      <button class="pill" onclick="showSec('lecon4',this,'b2')"><span class="pi">4</span>Leçon 4</button>
+      <button class="pill active" onclick="showSec('lecon1',this,'b2')"><span class="pi">1</span>Leçon 1 Ferial</button>
+      <button class="pill" onclick="showSec('lecon2',this,'b2')"><span class="pi">2</span>Leçon 2 Manal</button>
+      <button class="pill" onclick="showSec('lecon3',this,'b2')"><span class="pi">3</span>Leçon 3 Manal</button>
+      <button class="pill" onclick="showSec('lecon4',this,'b2')"><span class="pi">4</span>Leçon 4 Manal</button>
+      <button class="pill" onclick="showSec('lecon5',this,'b2')"><span class="pi">5</span>Leçon 5 Manal</button>
+      <button class="pill" onclick="showSec('exam',this,'b2')"><span class="pi">📝</span>Exam</button>
     </div>
   </nav>
   <main class="main">
     <section class="sec visible" id="b2-lecon1">
       <div class="sec-header">
-        <div><div class="sec-icon" style="background:#f0fdf4">B2</div><div class="sec-title">B2 <em>Leçon 1</em></div><div class="sec-ar">الدرس الأول</div></div>
+        <div><div class="sec-icon" style="background:#f0fdf4">B2</div><div class="sec-title">B2 <em>Leçon 1 Ferial</em></div><div class="sec-ar">الدرس الأول</div></div>
         <span class="usage-tag tag-fut">B2</span>
       </div>
-      <div class="card"><span class="card-label">Contenu</span><div class="note">Ajoutez ici le contenu de la leçon 1.</div></div>
+      <div class="b2-ferial-content" data-ferial-source="lecon1"></div>
     </section>
     <section class="sec" id="b2-lecon2">
       <div class="sec-header">
-        <div><div class="sec-icon" style="background:#f0fdf4">B2</div><div class="sec-title">B2 <em>Leçon 2</em></div><div class="sec-ar">الدرس الثاني</div></div>
+        <div><div class="sec-icon" style="background:#f0fdf4">B2</div><div class="sec-title">B2 <em>Leçon 2 Manal</em></div><div class="sec-ar">الدرس الثاني</div></div>
         <span class="usage-tag tag-fut">B2</span>
       </div>
-      <div class="card"><span class="card-label">Contenu</span><div class="note">Ajoutez ici le contenu de la leçon 2.</div></div>
+      <div class="b2-ferial-content" data-ferial-source="lecon2"></div>
     </section>
     <section class="sec" id="b2-lecon3">
       <div class="sec-header">
-        <div><div class="sec-icon" style="background:#f0fdf4">B2</div><div class="sec-title">B2 <em>Leçon 3</em></div><div class="sec-ar">الدرس الثالث</div></div>
+        <div><div class="sec-icon" style="background:#f0fdf4">B2</div><div class="sec-title">B2 <em>Leçon 3 Manal</em></div><div class="sec-ar">الدرس الثالث</div></div>
         <span class="usage-tag tag-fut">B2</span>
       </div>
-      <div class="card"><span class="card-label">Contenu</span><div class="note">Ajoutez ici le contenu de la leçon 3.</div></div>
+      <div class="b2-ferial-content" data-ferial-source="lecon3"></div>
     </section>
     <section class="sec" id="b2-lecon4">
       <div class="sec-header">
-        <div><div class="sec-icon" style="background:#f0fdf4">B2</div><div class="sec-title">B2 <em>Leçon 4</em></div><div class="sec-ar">الدرس الرابع</div></div>
+        <div><div class="sec-icon" style="background:#f0fdf4">B2</div><div class="sec-title">B2 <em>Leçon 4 Manal</em></div><div class="sec-ar">الدرس الرابع</div></div>
         <span class="usage-tag tag-fut">B2</span>
       </div>
-      <div class="card"><span class="card-label">Contenu</span><div class="note">Ajoutez ici le contenu de la leçon 4.</div></div>
+      <div class="b2-ferial-content" data-ferial-source="lecon4"></div>
+    </section>
+    <section class="sec" id="b2-lecon5">
+      <div class="sec-header">
+        <div><div class="sec-icon" style="background:#f0fdf4">B2</div><div class="sec-title">B2 <em>Leçon 5 Manal</em></div><div class="sec-ar">الدرس الخامس</div></div>
+        <span class="usage-tag tag-fut">B2</span>
+      </div>
+      <div class="b2-ferial-content" data-ferial-source="lecon5"></div>
+    </section>    <section class="sec" id="b2-exam">
+      <div class="sec-header">
+        <div><div class="sec-icon" style="background:#fff7ed">📝</div><div class="sec-title">B2 <em>Exam</em></div><div class="sec-ar">خمسة مواضيع للامتحان</div></div>
+        <span class="usage-tag tag-now">EXAM</span>
+      </div>
+      <div class="card visible-anim">
+        <span class="card-label">Exam · Sujets</span>
+        <div class="learning-card-grid b2-exam-sujet-grid" style="margin-top:10px">
+          <button class="learning-card is-lesson" type="button" data-b2-exam-sujet="sujet1" onclick="showB2ExamSujet('sujet1',this)"><span class="learning-card-icon">1</span><span class="learning-card-title">Les villes vertes et énergies renouvelables</span><span class="learning-card-desc">Sujet 1</span><span class="learning-card-meta">Ouvrir →</span></button>
+          <button class="learning-card is-lesson" type="button" data-b2-exam-sujet="sujet2" onclick="showB2ExamSujet('sujet2',this)"><span class="learning-card-icon">2</span><span class="learning-card-title">Pour ou contre les zoos</span><span class="learning-card-desc">Sujet 2</span><span class="learning-card-meta">Ouvrir →</span></button>
+          <button class="learning-card is-lesson" type="button" data-b2-exam-sujet="sujet3" onclick="showB2ExamSujet('sujet3',this)"><span class="learning-card-icon">3</span><span class="learning-card-title">La restauration rapide</span><span class="learning-card-desc">Sujet 3</span><span class="learning-card-meta">Ouvrir →</span></button>
+          <button class="learning-card is-lesson" type="button" data-b2-exam-sujet="sujet4" onclick="showB2ExamSujet('sujet4',this)"><span class="learning-card-icon">4</span><span class="learning-card-title">Les écrans pour les enfants</span><span class="learning-card-desc">Sujet 4</span><span class="learning-card-meta">Ouvrir →</span></button>
+          <button class="learning-card is-lesson" type="button" data-b2-exam-sujet="sujet5" onclick="showB2ExamSujet('sujet5',this)"><span class="learning-card-icon">5</span><span class="learning-card-title">Les outils numériques dans les écoles</span><span class="learning-card-desc">Sujet 5</span><span class="learning-card-meta">Ouvrir →</span></button>
+        </div>
+        <div id="b2-exam-sujet-content" class="b2-exam-sujet-content" hidden aria-live="polite"></div>
+      </div>
     </section>
   </main>
 </div>
@@ -10585,7 +10610,7 @@
 <script src="./assets/js/vocabulary.js" defer></script>
 <script src="./assets/js/lame.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
-<script src="./assets/js/main.js" defer></script>
+<script src="./assets/js/main.js?v=20260726-b2-exam-speech" defer></script>
 <script src="./assets/js/pronunciation.js" defer></script>
 <script src="./assets/js/b1-module.js" defer></script>
 </body>
