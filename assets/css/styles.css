@@ -6872,3 +6872,38 @@ body.pron-listening-open {
   color: #dc2626;
   background: #fef2f2;
 }
+.pron-voice-setting {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+}
+.pron-voice-setting .pron-speed-select {
+  border: 0;
+  padding: 3px;
+  background: transparent;
+}
+.pron-my-voice-status {
+  margin-top: 10px;
+  border-left: 4px solid #94a3b8;
+}
+.pron-my-voice-status.is-available {
+  border-left-color: #16a34a;
+  background: #f0fdf4;
+  color: #166534;
+}
+@media (max-width: 760px) {
+  .pron-voice-setting,
+  #pron-clear-my-voice {
+    width: 100%;
+  }
+  .pron-voice-setting {
+    justify-content: space-between;
+  }
+}

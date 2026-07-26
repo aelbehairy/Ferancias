@@ -16,7 +16,7 @@
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&amp;family=Fira+Code:wght@400;500&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./assets/css/styles.css?v=20260726-b2-exam-speech">
+<link rel="stylesheet" href="./assets/css/styles.css?v=20260726-my-voice">
 <link rel="stylesheet" href="./assets/css/pronunciation.css">
 </head>
 <body class="learning-content-hidden">
@@ -5945,8 +5945,11 @@
               <option value="1.25">Fast (1.25x)</option>
               <option value="1.5">Very Fast (1.5x)</option>
             </select>
+            <label class="pron-voice-setting"><span>Voice</span><select id="pron-voice-mode" class="pron-speed-select" onchange="updatePronunciationVoiceMode()"><option value="system">French system voice</option><option value="my-voice">My Voice (recording)</option></select></label>
+            <button id="pron-clear-my-voice" class="sec-tool-btn" type="button" onclick="clearCurrentPronunciationMyVoice()"><span class="btn-icon">🗑</span><strong>Clear My Voice</strong></button>
           </div>
-          <textarea id="pron-original-text" class="pron-textarea" rows="4" placeholder="Word to pronounce...">Bonjour</textarea>
+          <textarea id="pron-original-text" class="pron-textarea" rows="4" onchange="refreshPronunciationMyVoiceStatus()" placeholder="Word to pronounce...">Bonjour</textarea>
+          <div id="pron-my-voice-status" class="pron-my-voice-status note">My Voice: no saved recording checked yet.</div>
           <details class="pron-translation-panel">
             <summary><span>Arabic translation</span><span class="pron-translation-arrow" aria-hidden="true">▾</span></summary>
             <div id="pron-arabic-translation" class="pron-arabic-translation" dir="rtl">الترجمة العربية تظهر هنا.</div>
@@ -10610,7 +10613,7 @@
 <script src="./assets/js/vocabulary.js" defer></script>
 <script src="./assets/js/lame.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
-<script src="./assets/js/main.js?v=20260726-b2-exam-speech" defer></script>
+<script src="./assets/js/main.js?v=20260726-my-voice" defer></script>
 <script src="./assets/js/pronunciation.js" defer></script>
 <script src="./assets/js/b1-module.js" defer></script>
 </body>

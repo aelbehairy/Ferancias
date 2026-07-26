@@ -3418,7 +3418,102 @@ var pronunciationPcmSource = null;
 var pronunciationPcmProcessor = null;
 var pronunciationPcmChunks = [];
 var pronunciationPcmSampleRate = 44100;
+var currentPronunciationAudio = null;
+var currentPronunciationAudioUrl = '';
+var pronunciationVoiceDbPromise = null;
 
+function openPronunciationVoiceDb(){
+  if(pronunciationVoiceDbPromise) return pronunciationVoiceDbPromise;
+  pronunciationVoiceDbPromise = new Promise(function(resolve, reject){
+    if(!window.indexedDB){ reject(new Error('IndexedDB unavailable')); return; }
+    var request = indexedDB.open('francais-my-voice', 1);
+    request.onupgradeneeded = function(){
+      var db = request.result;
+      if(!db.objectStoreNames.contains('recordings')) db.createObjectStore('recordings', {keyPath:'text'});
+    };
+    request.onsuccess = function(){ resolve(request.result); };
+    request.onerror = function(){ reject(request.error || new Error('Could not open voice storage')); };
+  });
+  return pronunciationVoiceDbPromise;
+}
+
+function setPronunciationMyVoiceStatus(message, available){
+  var status = document.getElementById('pron-my-voice-status');
+  if(!status) return;
+  status.textContent = message;
+  status.classList.toggle('is-available', !!available);
+}
+
+async function getPronunciationMyVoiceRecording(text){
+  var db = await openPronunciationVoiceDb();
+  return new Promise(function(resolve, reject){
+    var request = db.transaction('recordings', 'readonly').objectStore('recordings').get(String(text || '').trim());
+    request.onsuccess = function(){ resolve(request.result || null); };
+    request.onerror = function(){ reject(request.error); };
+  });
+}
+
+async function refreshPronunciationMyVoiceStatus(){
+  var text = getPronunciationOriginalTextValue();
+  try {
+    var record = await getPronunciationMyVoiceRecording(text);
+    setPronunciationMyVoiceStatus(record ? 'My Voice: recording saved for this text.' : 'My Voice: record this text with Start mic, then press Stop.', !!record);
+  } catch(error){
+    setPronunciationMyVoiceStatus('My Voice storage is unavailable in this browser.', false);
+  }
+}
+
+async function saveCurrentPronunciationAsMyVoice(){
+  if(!pronunciationRecordingChunks.length) return;
+  var text = getPronunciationOriginalTextValue();
+  var blob = new Blob(pronunciationRecordingChunks.slice(), {type: pronunciationRecordingMimeType || 'audio/webm'});
+  if(!blob.size) return;
+  try {
+    var db = await openPronunciationVoiceDb();
+    await new Promise(function(resolve, reject){
+      var request = db.transaction('recordings', 'readwrite').objectStore('recordings').put({text:text, blob:blob, updatedAt:new Date().toISOString()});
+      request.onsuccess = function(){ resolve(); };
+      request.onerror = function(){ reject(request.error); };
+    });
+    setPronunciationMyVoiceStatus('My Voice: recording saved for this text.', true);
+  } catch(error){
+    setPronunciationMyVoiceStatus('My Voice recording could not be saved.', false);
+  }
+}
+
+async function clearCurrentPronunciationMyVoice(){
+  var text = getPronunciationOriginalTextValue();
+  try {
+    var db = await openPronunciationVoiceDb();
+    await new Promise(function(resolve, reject){
+      var request = db.transaction('recordings', 'readwrite').objectStore('recordings').delete(text);
+      request.onsuccess = function(){ resolve(); };
+      request.onerror = function(){ reject(request.error); };
+    });
+    stopPronunciationText();
+    setPronunciationMyVoiceStatus('My Voice: recording removed for this text.', false);
+  } catch(error){
+    setPronunciationMyVoiceStatus('My Voice recording could not be removed.', false);
+  }
+}
+
+function getPronunciationVoiceMode(){
+  var select = document.getElementById('pron-voice-mode');
+  return select ? select.value : (localStorage.getItem('pronunciationVoiceMode') || 'system');
+}
+
+function updatePronunciationVoiceMode(){
+  var mode = getPronunciationVoiceMode();
+  localStorage.setItem('pronunciationVoiceMode', mode);
+  stopPronunciationText();
+  refreshPronunciationMyVoiceStatus();
+}
+
+function initPronunciationVoiceMode(){
+  var select = document.getElementById('pron-voice-mode');
+  if(select) select.value = localStorage.getItem('pronunciationVoiceMode') || 'system';
+  refreshPronunciationMyVoiceStatus();
+}
 function getPronunciationRecognition(){
   var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SpeechRecognition) return null;
@@ -3631,6 +3726,7 @@ async function startPronunciationAudioRecording(){
       setPronunciationStatus('Listening... Audio recording failed, transcript still works.');
     };
     pronunciationMediaRecorder.onstop = function(){
+      saveCurrentPronunciationAsMyVoice();
       stopPronunciationRecordingStream();
     };
     pronunciationMediaRecorder.start();
@@ -4023,6 +4119,7 @@ function initPronunciationPractice(){
   pronunciationScores = {};
   renderPronunciationWords();
   loadFirstWord();
+  initPronunciationVoiceMode();
 }
 
 function renderPronunciationWords(){
@@ -4063,19 +4160,49 @@ function loadPronunciationWord(index){
   schedulePronunciationArabicTranslation(0);
   resizePronunciationTextareas();
   updatePronunciationIPAReference(word);
+  refreshPronunciationMyVoiceStatus();
 }
 
 var currentSynthUtterance = null;
 
 
-function playPronunciationText(){
-  if(!('speechSynthesis' in window)){
-    alert('Speech synthesis is not supported in this browser.');
-    return;
-  }
+async function playPronunciationText(){
   var original = document.getElementById('pron-original-text');
   if(!original || !original.value.trim()){
     alert('Please add text to play.');
+    return;
+  }
+  if(getPronunciationVoiceMode() === 'my-voice'){
+    if(currentPronunciationAudio && currentPronunciationAudio.paused && currentPronunciationAudio.currentTime > 0){
+      await currentPronunciationAudio.play();
+      setPronunciationButtonState('playing');
+      return;
+    }
+    stopPronunciationText();
+    try {
+      var record = await getPronunciationMyVoiceRecording(original.value.trim());
+      if(!record || !record.blob){
+        setPronunciationMyVoiceStatus('My Voice: no recording for this text. Press Start mic, read it, then press Stop.', false);
+        return;
+      }
+      currentPronunciationAudioUrl = URL.createObjectURL(record.blob);
+      currentPronunciationAudio = new Audio(currentPronunciationAudioUrl);
+      currentPronunciationAudio.playbackRate = parseFloat(document.getElementById('pron-speed').value) || 1;
+      currentPronunciationAudio.onended = stopPronunciationText;
+      currentPronunciationAudio.onerror = function(){
+        setPronunciationMyVoiceStatus('My Voice recording could not be played.', false);
+        stopPronunciationText();
+      };
+      await currentPronunciationAudio.play();
+      setPronunciationButtonState('playing');
+      return;
+    } catch(error){
+      setPronunciationMyVoiceStatus('My Voice recording could not be loaded.', false);
+      return;
+    }
+  }
+  if(!('speechSynthesis' in window)){
+    alert('Speech synthesis is not supported in this browser.');
     return;
   }
   if(window.speechSynthesis.paused){
@@ -4087,14 +4214,20 @@ function playPronunciationText(){
   var utterance = new SpeechSynthesisUtterance(original.value);
   utterance.lang = 'fr-FR';
   utterance.rate = parseFloat(document.getElementById('pron-speed').value) || 1;
+  var selectedVoice = typeof getTcfEcritSelectedSpeechVoice === 'function' ? getTcfEcritSelectedSpeechVoice() : null;
+  if(selectedVoice) utterance.voice = selectedVoice;
   utterance.onend = function(){ setPronunciationButtonState('stopped'); };
   utterance.onerror = function(){ setPronunciationButtonState('stopped'); };
   currentSynthUtterance = utterance;
   window.speechSynthesis.speak(utterance);
   setPronunciationButtonState('playing');
 }
-
 function pausePronunciationText(){
+  if(currentPronunciationAudio && !currentPronunciationAudio.paused){
+    currentPronunciationAudio.pause();
+    setPronunciationButtonState('paused');
+    return;
+  }
   if(!('speechSynthesis' in window)) return;
   if(window.speechSynthesis.speaking && !window.speechSynthesis.paused){
     window.speechSynthesis.pause();
@@ -4103,17 +4236,25 @@ function pausePronunciationText(){
 }
 
 function stopPronunciationText(){
-  if(!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  if(currentPronunciationAudio){
+    currentPronunciationAudio.pause();
+    currentPronunciationAudio.src = '';
+    currentPronunciationAudio = null;
+  }
+  if(currentPronunciationAudioUrl){
+    URL.revokeObjectURL(currentPronunciationAudioUrl);
+    currentPronunciationAudioUrl = '';
+  }
   currentSynthUtterance = null;
   setPronunciationButtonState('stopped');
 }
-
 function updatePronunciationSpeed(){
   var speed = parseFloat(document.getElementById('pron-speed').value) || 1;
   if(currentSynthUtterance){
     currentSynthUtterance.rate = speed;
   }
+  if(currentPronunciationAudio) currentPronunciationAudio.playbackRate = speed;
 }
 
 function setPronunciationButtonState(state){
