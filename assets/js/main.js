@@ -1677,6 +1677,8 @@ var learningDescriptions = {
   temps:'Présent, passé, futur et modes',
   b1:'Leçons de niveau B1',
   b2:'Leçons de niveau B2',
+  grammarVocab:'137 verbes français avec prononciation et traduction',
+  pretcf:'Préparation progressive au TCF',
   devoirs:'Devoirs Mariane et réponses préparées',
   ferial:'Oral Manal & Ferial',
   mariane:'Questions orales Mariane et Linda',
@@ -1764,6 +1766,9 @@ function getGrammarCategories(){
     }},
     {key:'b2', icon:'B2', title:'B2', desc:learningDescriptions.b2, action:function(){
       showGrammarChild('b2', document.querySelector('.grammar-mode-tabs .pill[data-grammar-mode="b2"]'));
+    }},
+    {key:'pretcf', icon:'TCF', title:'Pre TCF', desc:learningDescriptions.pretcf, action:function(){
+      switchTop('grammaire', document.querySelector('.top-tab[onclick*="grammaire"]'));
     }}
   ];
 }
@@ -1877,6 +1882,30 @@ function getLessonCards(mainKey, groupKey){
     if(groupKey === 'temps') return buttonCards('#pills-temps .pill');
     if(groupKey === 'b1') return buttonCards('#pills-b1 .pill');
     if(groupKey === 'b2') return buttonCards('#pills-b2 .pill');
+    if(groupKey === 'pretcf') {
+      return [
+        {
+          key:'pretcf-lecon1',
+          icon:'1',
+          title:'Leçon 1',
+          desc:'Ouvrir la première leçon Pre TCF',
+          action:function(){
+            switchTop('grammaire', document.querySelector('.top-tab[onclick*="grammaire"]'));
+            showSec('pretcf-lecon1', null, 'grammaire');
+          }
+        },
+        {
+          key:'vocab',
+          icon:'Aa',
+          title:'Vocab',
+          desc:learningDescriptions.grammarVocab,
+          action:function(){
+            switchTop('grammaire', document.querySelector('.top-tab[onclick*="grammaire"]'));
+            showSec('vocab', null, 'grammaire');
+          }
+        }
+      ];
+    }
   }
   if(mainKey === 'oral' && groupKey === 'mariane') return buttonCards('#pills-mariane .pill');
   if(mainKey === 'oral' && groupKey === 'ferial') return getFerialLessonCards();
@@ -1901,7 +1930,7 @@ function inferLearningState(panel, section){
     state.lesson = section || null;
   } else if(panel === 'grammaire'){
     state.main = 'grammaire';
-    state.group = 'roles';
+    state.group = section === 'vocab' || (section && section.indexOf('pretcf-') === 0) ? 'pretcf' : 'roles';
     state.lesson = section && section !== 'books' ? section : null;
   } else if(panel === 'oral'){
     state.main = 'oral';
@@ -1961,6 +1990,7 @@ function updateFinalCardRoute(mainKey, key){
 
 function updateLessonCardRoute(mainKey, groupKey, key){
   if(mainKey === 'tcf' && groupKey === 'ecrit') updateRoute('tcf', key);
+  else if(mainKey === 'grammaire' && groupKey === 'pretcf') updateRoute('grammaire', key);
 }
 
 function routeHasFinalContent(panel, section){
