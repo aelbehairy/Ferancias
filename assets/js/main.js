@@ -7558,6 +7558,26 @@ function setQCardsOpen(selector, open, event){
   });
 }
 
+function togglePretcfExerciseDetails(button, event){
+  if(event){
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  var exercise = document.getElementById('pretcf-lecon1-exercice');
+  if(!exercise) return;
+  var parts = Array.prototype.slice.call(exercise.querySelectorAll('.pretcf-exercise-part'));
+  var shouldExpand = parts.some(function(part){ return !part.open; });
+  parts.forEach(function(part){ part.open = shouldExpand; });
+  if(button){
+    button.setAttribute('aria-expanded', String(shouldExpand));
+    button.setAttribute('aria-label', shouldExpand ? 'Collapse all exercise sections' : 'Expand all exercise sections');
+    var icon = button.querySelector('.btn-icon');
+    var label = button.querySelector('strong');
+    if(icon) icon.textContent = shouldExpand ? '⤡' : '⤢';
+    if(label) label.textContent = shouldExpand ? 'Collapse all' : 'Expand all';
+  }
+}
+
 function exportSectionToPdf(selector, title, event){
   if(event){
     event.preventDefault();
@@ -7566,13 +7586,16 @@ function exportSectionToPdf(selector, title, event){
   var section = document.querySelector(selector);
   if(!section) return;
   var printable = section.cloneNode(true);
+  printable.querySelectorAll('details').forEach(function(details){
+    details.open = true;
+  });
   printable.querySelectorAll('.q-card').forEach(function(card){
     card.classList.add('open');
   });
   printable.querySelectorAll('.card, .q-card, .article-card, .sec').forEach(function(el){
     el.classList.add('visible-anim');
   });
-  printable.querySelectorAll('.sec-export-top-left, .sec-header-actions, button, .q-arrow').forEach(function(el){
+  printable.querySelectorAll('.sec-export-top-left, .sec-header-actions, .pretcf-exercise-tools, button, .q-arrow').forEach(function(el){
     el.remove();
   });
   var printWindow = window.open('', '_blank');
