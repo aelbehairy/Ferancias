@@ -1660,6 +1660,7 @@ var learningExplorer = {
 };
 
 var learningMainCards = [
+  {key:'tcf-exam', icon:'TCF', title:'TCF EXAM', desc:'Les 4 épreuves officielles du TCF'},
   {key:'grammaire', icon:'📚', title:'Grammaire', desc:'Rôles, livres, temps et niveaux B1/B2'},
   {key:'books', icon:'📘', title:'Books', desc:'PDF et ressources de grammaire'},
   {key:'oral', icon:'🎤', title:'Oral', desc:'Questions, devoirs et entraînement oral'},
@@ -1774,6 +1775,13 @@ function getGrammarCategories(){
 }
 
 function getCardsForMain(mainKey){
+  if(mainKey === 'tcf-exam') return [
+    {key:'expliquer', icon:'0', title:'Expliquer', desc:'Comprendre le déroulement et les épreuves du TCF', action:function(){}},
+    {key:'expression-orale', icon:'1', title:'Expression orale', desc:'3 tâches : présentation, interaction et argumentation', action:function(){}},
+    {key:'expression-ecrite', icon:'2', title:'Expression écrite', desc:'3 tâches : message, récit et opinion', action:function(){}},
+    {key:'comprehension-orale', icon:'3', title:'Compréhension orale', desc:'39 questions', action:function(){}},
+    {key:'comprehension-ecrite', icon:'4', title:'Compréhension écrite', desc:'39 questions', action:function(){}}
+  ];
   if(mainKey === 'grammaire') return getGrammarCategories();
   if(mainKey === 'books') return getBookCards();
   if(mainKey === 'oral') {
@@ -1871,6 +1879,23 @@ function getTcfEcritTaskCards(){
 }
 
 function getLessonCards(mainKey, groupKey){
+  if(mainKey === 'tcf-exam'){
+    if(groupKey === 'expression-ecrite') return [
+      {key:'ecrite-tache-1', icon:'1', title:'Tâche 1 : Message', desc:'Rédiger un message', action:function(){}},
+      {key:'ecrite-tache-2', icon:'2', title:'Tâche 2 : Récit / Article / Lettre', desc:'Raconter et informer', action:function(){}},
+      {key:'ecrite-tache-3', icon:'3', title:'Tâche 3 : Comparaison + Opinion', desc:'Comparer et donner son opinion', action:function(){}}
+    ];
+    if(groupKey === 'expression-orale') return [
+      {key:'oral-full', icon:'F', title:'Full', desc:'Présentation complète en français', action:function(){}},
+      {key:'oral-questions', icon:'Q', title:'Questions', desc:'Questions et réponses de l’examinateur', action:function(){}},
+      {key:'oral-picture', icon:'🖼', title:'Image', desc:'Fiche visuelle de l’examen oral', action:function(){}},
+      {key:'orale-tache-1', icon:'1', title:'Tâche 1 : Présentation personnelle', desc:'Se présenter clairement', action:function(){}},
+      {key:'orale-tache-2', icon:'2', title:'Tâche 2 : Interaction / Questions', desc:'Interagir et poser des questions', action:function(){}},
+      {key:'orale-tache-3', icon:'3', title:'Tâche 3 : Opinion / Argumentation', desc:'Exprimer et défendre une opinion', action:function(){}}
+    ];
+    if(groupKey === 'comprehension-orale') return [{key:'comprehension-orale-39', icon:'39', title:'39 Questions', desc:'Entraînement de compréhension orale', action:function(){}}];
+    if(groupKey === 'comprehension-ecrite') return [{key:'comprehension-ecrite-39', icon:'39', title:'39 Questions', desc:'Entraînement de compréhension écrite', action:function(){}}];
+  }
   if(mainKey === 'grammaire'){
     if(groupKey === 'roles') {
       return buttonCards('#pills-grammaire .pill', {
@@ -1921,7 +1946,10 @@ function findLearningMain(key){
 
 function inferLearningState(panel, section){
   var state = {main:null, group:null, lesson:null};
-  if(panel === 'books'){
+  if(panel === 'tcf-exam'){
+    state.main = 'tcf-exam';
+    state.group = section || null;
+  } else if(panel === 'books'){
     state.main = 'books';
     state.group = section || null;
   } else if(panel === 'temps' || panel === 'b1' || panel === 'b2'){
@@ -1973,7 +2001,8 @@ function setLearningContentVisible(isVisible){
 }
 
 function updateParentCardRoute(mainKey, groupKey){
-  if(mainKey === 'grammaire' && (groupKey === 'temps' || groupKey === 'b1' || groupKey === 'b2')) updateRoute(groupKey, null);
+  if(mainKey === 'tcf-exam') updateRoute('tcf-exam', groupKey);
+  else if(mainKey === 'grammaire' && (groupKey === 'temps' || groupKey === 'b1' || groupKey === 'b2')) updateRoute(groupKey, null);
   else if(mainKey === 'grammaire') updateRoute('grammaire', null);
   else if(mainKey === 'oral' && groupKey === 'ferial') updateRoute('oral', 'ferial');
   else if(mainKey === 'oral') updateRoute('oral', null);
@@ -1983,7 +2012,8 @@ function updateParentCardRoute(mainKey, groupKey){
 }
 
 function updateFinalCardRoute(mainKey, key){
-  if(mainKey === 'vocabulary') updateRoute('vocabulary', key);
+  if(mainKey === 'tcf-exam') updateRoute('tcf-exam', key);
+  else if(mainKey === 'vocabulary') updateRoute('vocabulary', key);
   else if(mainKey === 'lire') updateRoute('lire', key);
   else if(mainKey === 'videos') updateRoute('videos', key);
 }
@@ -1994,6 +2024,7 @@ function updateLessonCardRoute(mainKey, groupKey, key){
 }
 
 function routeHasFinalContent(panel, section){
+  if(panel === 'tcf-exam') return false;
   if(panel === 'dictionary') return true;
   if(panel === 'videos') return true;
   if(!section) return false;
@@ -2045,6 +2076,7 @@ function renderLearningCards(cards, level){
       (level === 'group' && card.key === learningExplorer.group) ||
       (level === 'lesson' && card.key === learningExplorer.lesson);
     var sizeClass = level === 'lesson' ? ' is-lesson' : (level === 'group' ? ' is-medium' : '');
+    if(level === 'main' && card.key === 'tcf-exam') sizeClass += ' is-tcf-exam';
     return '<button class="learning-card' + sizeClass + (active ? ' active' : '') + '" type="button" data-learning-key="' + escapeHtml(card.key) + '">' +
       '<span class="learning-card-icon">' + escapeHtml(card.icon || '•') + '</span>' +
       '<span class="learning-card-title">' + escapeHtml(card.title) + '</span>' +
@@ -2070,7 +2102,7 @@ function renderLearningCards(cards, level){
         var childCards = getLessonCards(learningExplorer.main, key);
         var isFinalCard = !childCards.length;
         setLearningState({main:learningExplorer.main, group:key});
-        setLearningContentVisible(isFinalCard);
+        setLearningContentVisible(isFinalCard && learningExplorer.main !== 'tcf-exam');
         card.action();
         if(isFinalCard) updateFinalCardRoute(learningExplorer.main, key);
         else updateParentCardRoute(learningExplorer.main, key);
@@ -2078,7 +2110,7 @@ function renderLearningCards(cards, level){
         setLearningContentVisible(isFinalCard);
       } else {
         learningExplorer.lesson = key;
-        setLearningContentVisible(true);
+        setLearningContentVisible(learningExplorer.main !== 'tcf-exam');
         card.action();
         updateLessonCardRoute(learningExplorer.main, learningExplorer.group, key);
       }
@@ -2089,6 +2121,8 @@ function renderLearningCards(cards, level){
 
 function renderLearningExplorer(){
   if(!learningExplorer.root) return;
+  var previousOralContent = document.getElementById('tcf-exam-oral-content');
+  if(previousOralContent) previousOralContent.remove();
   renderLearningBreadcrumb();
   if(learningExplorer.back){
     learningExplorer.back.hidden = !learningExplorer.main;
@@ -2104,6 +2138,7 @@ function renderLearningExplorer(){
   if(!learningExplorer.main){
     renderLearningCards(learningMainCards.map(function(card){
       return Object.assign({}, card, {action:function(){
+        if(card.key === 'tcf-exam') { writeRoute('tcf-exam', null); return; }
         if(card.key === 'grammaire') switchTop('grammaire', document.querySelector('.top-tab'));
         else if(card.key === 'pronunciation') showMainCardsFor('pronunciation', document.querySelector('.top-tab[onclick*="pronunciation"]'));
         else switchTop(card.key, document.querySelector('.top-tab[onclick*="' + card.key + '"]'));
@@ -2111,9 +2146,21 @@ function renderLearningExplorer(){
     }), 'main');
     return;
   }
+  if(learningExplorer.main === 'tcf-exam' && learningExplorer.group === 'expliquer'){
+    learningExplorer.grid.innerHTML =
+      '<figure class="tcf-exam-image-card">' +
+        '<img src="./assets/tcf/tcf-canada-guide-ar.png" alt="دليل شامل لأقسام امتحان TCF Canada" loading="lazy">' +
+        '<figcaption>Guide complet du TCF Canada — العربية</figcaption>' +
+      '</figure>';
+    return;
+  }
   var lessonCards = getLessonCards(learningExplorer.main, learningExplorer.group);
   if(learningExplorer.group && lessonCards.length){
     renderLearningCards(lessonCards, 'lesson');
+    if(learningExplorer.main === 'tcf-exam' && learningExplorer.group === 'expression-orale' && learningExplorer.lesson && window.renderTcfExamOralLesson){
+      var oralContent = window.renderTcfExamOralLesson(learningExplorer.lesson);
+      if(oralContent) learningExplorer.grid.insertAdjacentHTML('afterend', '<div id="tcf-exam-oral-content" class="tcf-exam-oral-content">' + oralContent + '</div>');
+    }
     return;
   }
   renderLearningCards(getCardsForMain(learningExplorer.main), 'group');
@@ -4438,6 +4485,11 @@ function showTcf(id, btn){
 }
 
 function showTcfEcritSub(id, btn){
+  var loisirs = document.getElementById('tcf-expliquer-loisirs');
+  var expliquer = document.getElementById('tcf-ecrit-expliquer');
+  if(loisirs && expliquer && loisirs.parentElement !== expliquer){
+    expliquer.appendChild(loisirs);
+  }
   document.querySelectorAll('#tcf-ecrit .tcf-ecrit-sub').forEach(function(s){ s.classList.remove('visible'); });
   document.querySelectorAll('#tcf-ecrit .tcf-tache1-tabs .pill, #tcf-ecrit .tcf-tache1-tabs .learning-card').forEach(function(b){ b.classList.remove('active'); });
   document.querySelectorAll('#learning-card-grid .learning-card[data-learning-key="ecrit1"], #learning-card-grid .learning-card[data-learning-key="tache2"]').forEach(function(b){ b.classList.remove('active'); });
