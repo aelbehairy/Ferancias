@@ -389,6 +389,34 @@ body {
   max-width: 1180px;
   margin: 0 auto;
 }
+.tcf-exam-tools {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  margin: 0 0 12px;
+}
+.tcf-exam-tools .export-pdf-btn {
+  border-color: #fdba74;
+  background: #fff7ed;
+  color: #ea580c;
+}
+.tcf-exam-tools .export-pdf-btn:hover {
+  border-color: #f97316;
+  background: #f97316;
+  color: #ffffff;
+}
+.tcf-exam-tools .tcf-exam-speech-btn.is-playing {
+  border-color: #dc2626;
+  background: #dc2626;
+  color: #ffffff;
+}
+@media (max-width: 520px) {
+  .tcf-exam-tools { justify-content: stretch; }
+  .tcf-exam-tools .sec-tool-btn { flex: 1 1 auto; justify-content: center; }
+}
 .learning-card {
   position: relative;
   min-height: 138px;
@@ -427,6 +455,13 @@ body {
   border-radius: 999px;
   background: linear-gradient(90deg, #002395, #ffffff, #ed2939);
   box-shadow: 0 2px 10px rgba(26, 86, 219, 0.2);
+}
+.learning-card.is-task-parent {
+  grid-column: 1 / -1;
+  min-height: 104px;
+}
+.learning-card.is-task-child {
+  min-height: 128px;
 }
 .learning-card.is-tcf-exam {
   background: linear-gradient(135deg, #15803d 0%, #16a34a 55%, #22c55e 100%);
@@ -488,6 +523,21 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
+.tcf-oral-document-grid.tcf-oral-full-list {
+  grid-template-columns: 1fr;
+}
+.tcf-oral-document-grid.tcf-oral-questions-list {
+  grid-template-columns: 1fr;
+}
+.tcf-oral-full-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 190px) minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
+}
+.tcf-oral-full-row h3 {
+  margin: 0;
+}
 .tcf-oral-topic {
   padding: 18px;
   border: 1px solid #dbeafe;
@@ -531,6 +581,7 @@ body {
 @media (max-width: 760px) {
   .tcf-oral-document { padding: 15px; }
   .tcf-oral-document-grid { grid-template-columns: 1fr; }
+  .tcf-oral-full-row { grid-template-columns: 1fr; gap: 8px; }
 }
 .learning-card-icon {
   display: inline-flex;

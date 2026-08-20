@@ -1878,6 +1878,14 @@ function getTcfEcritTaskCards(){
   ];
 }
 
+function getTcfOralTask1Cards(){
+  return [
+    {key:'oral-full', icon:'F', title:'Full', desc:'Présentation complète en français', action:function(){}},
+    {key:'oral-questions', icon:'Q', title:'Questions', desc:'Questions et réponses de l’examinateur', action:function(){}},
+    {key:'oral-picture', icon:'IMG', title:'Image', desc:'Fiche visuelle de l’examen oral', action:function(){}}
+  ];
+}
+
 function getLessonCards(mainKey, groupKey){
   if(mainKey === 'tcf-exam'){
     if(groupKey === 'expression-ecrite') return [
@@ -1886,9 +1894,6 @@ function getLessonCards(mainKey, groupKey){
       {key:'ecrite-tache-3', icon:'3', title:'Tâche 3 : Comparaison + Opinion', desc:'Comparer et donner son opinion', action:function(){}}
     ];
     if(groupKey === 'expression-orale') return [
-      {key:'oral-full', icon:'F', title:'Full', desc:'Présentation complète en français', action:function(){}},
-      {key:'oral-questions', icon:'Q', title:'Questions', desc:'Questions et réponses de l’examinateur', action:function(){}},
-      {key:'oral-picture', icon:'🖼', title:'Image', desc:'Fiche visuelle de l’examen oral', action:function(){}},
       {key:'orale-tache-1', icon:'1', title:'Tâche 1 : Présentation personnelle', desc:'Se présenter clairement', action:function(){}},
       {key:'orale-tache-2', icon:'2', title:'Tâche 2 : Interaction / Questions', desc:'Interagir et poser des questions', action:function(){}},
       {key:'orale-tache-3', icon:'3', title:'Tâche 3 : Opinion / Argumentation', desc:'Exprimer et défendre une opinion', action:function(){}}
@@ -2056,6 +2061,11 @@ function renderLearningBreadcrumb(){
   getLessonCards(learningExplorer.main, learningExplorer.group).forEach(function(card){
     if(card.key === learningExplorer.lesson) lessonTitle = card.title;
   });
+  if(learningExplorer.main === 'tcf-exam' && learningExplorer.group === 'expression-orale'){
+    getTcfOralTask1Cards().forEach(function(card){
+      if(card.key === learningExplorer.lesson) lessonTitle = card.title;
+    });
+  }
   var crumbs = [{label:'Home', action:function(){ setLearningState({}); setLearningContentVisible(false); updateRouteForLearningState(); renderLearningExplorer(); }}];
   if(main) crumbs.push({label:main.title, action:function(){ setLearningState({main:main.key}); setLearningContentVisible(false); updateRouteForLearningState(); renderLearningExplorer(); }});
   if(groupTitle) crumbs.push({label:groupTitle, action:function(){ setLearningState({main:learningExplorer.main, group:learningExplorer.group}); setLearningContentVisible(false); updateRouteForLearningState(); renderLearningExplorer(); }});
@@ -2076,6 +2086,8 @@ function renderLearningCards(cards, level){
       (level === 'group' && card.key === learningExplorer.group) ||
       (level === 'lesson' && card.key === learningExplorer.lesson);
     var sizeClass = level === 'lesson' ? ' is-lesson' : (level === 'group' ? ' is-medium' : '');
+    if(card.layout === 'task-parent') sizeClass += ' is-task-parent';
+    if(card.layout === 'task-child') sizeClass += ' is-task-child';
     if(level === 'main' && card.key === 'tcf-exam') sizeClass += ' is-tcf-exam';
     return '<button class="learning-card' + sizeClass + (active ? ' active' : '') + '" type="button" data-learning-key="' + escapeHtml(card.key) + '">' +
       '<span class="learning-card-icon">' + escapeHtml(card.icon || '•') + '</span>' +
@@ -2123,6 +2135,7 @@ function renderLearningExplorer(){
   if(!learningExplorer.root) return;
   var previousOralContent = document.getElementById('tcf-exam-oral-content');
   if(previousOralContent) previousOralContent.remove();
+  if(learningExplorer.main !== 'tcf-exam') stopCurrentTcfExamSpeech();
   renderLearningBreadcrumb();
   if(learningExplorer.back){
     learningExplorer.back.hidden = !learningExplorer.main;
@@ -2156,10 +2169,21 @@ function renderLearningExplorer(){
   }
   var lessonCards = getLessonCards(learningExplorer.main, learningExplorer.group);
   if(learningExplorer.group && lessonCards.length){
+    var isOralTask1 = learningExplorer.main === 'tcf-exam' &&
+      learningExplorer.group === 'expression-orale' &&
+      ['orale-tache-1', 'oral-full', 'oral-questions', 'oral-picture'].indexOf(learningExplorer.lesson) !== -1;
+    if(isOralTask1){
+      renderLearningCards(getTcfOralTask1Cards(), 'lesson');
+      if(learningExplorer.lesson !== 'orale-tache-1' && window.renderTcfExamOralLesson){
+        var taskOneContent = window.renderTcfExamOralLesson(learningExplorer.lesson);
+        if(taskOneContent) learningExplorer.grid.insertAdjacentHTML('afterend', '<div id="tcf-exam-oral-content" class="tcf-exam-oral-content">' + getTcfExamToolsHtml() + taskOneContent + '</div>');
+      }
+      return;
+    }
     renderLearningCards(lessonCards, 'lesson');
     if(learningExplorer.main === 'tcf-exam' && learningExplorer.group === 'expression-orale' && learningExplorer.lesson && window.renderTcfExamOralLesson){
       var oralContent = window.renderTcfExamOralLesson(learningExplorer.lesson);
-      if(oralContent) learningExplorer.grid.insertAdjacentHTML('afterend', '<div id="tcf-exam-oral-content" class="tcf-exam-oral-content">' + oralContent + '</div>');
+      if(oralContent) learningExplorer.grid.insertAdjacentHTML('afterend', '<div id="tcf-exam-oral-content" class="tcf-exam-oral-content">' + getTcfExamToolsHtml() + oralContent + '</div>');
     }
     return;
   }
@@ -7630,6 +7654,94 @@ function togglePretcfExerciseDetails(button, event){
   }
 }
 
+function getTcfExamToolsHtml(){
+  return '<div id="tcf-exam-tools" class="tcf-exam-tools">' +
+    '<button class="sec-tool-btn export-pdf-btn" type="button" onclick="exportCurrentTcfExamPdf(event)" aria-label="Export current TCF Exam content to PDF">' +
+      '<span aria-hidden="true">📄</span><strong>Export PDF</strong>' +
+    '</button>' +
+    '<button id="tcf-exam-speech-btn" class="sec-tool-btn tcf-exam-speech-btn" type="button" onclick="toggleCurrentTcfExamSpeech(event)" aria-label="Play current TCF Exam text">' +
+      '<span aria-hidden="true">▶</span><strong>Play text</strong>' +
+    '</button>' +
+  '</div>';
+}
+
+function getCurrentTcfExamContent(){
+  return document.getElementById('tcf-exam-oral-content') || document.getElementById('learning-card-grid');
+}
+
+function getCurrentTcfExamTitle(){
+  var current = document.querySelector('#learning-breadcrumb .crumb-current');
+  return current ? current.textContent.trim() : 'TCF Exam';
+}
+
+function exportCurrentTcfExamPdf(event){
+  if(event){
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  var content = getCurrentTcfExamContent();
+  if(!content) return;
+  var temporary = document.createElement('section');
+  temporary.id = 'tcf-exam-print-content';
+  temporary.hidden = true;
+  temporary.appendChild(content.cloneNode(true));
+  document.body.appendChild(temporary);
+  exportSectionToPdf('#tcf-exam-print-content', getCurrentTcfExamTitle() + ' — TCF Exam');
+  temporary.remove();
+}
+
+function resetCurrentTcfExamSpeechButton(){
+  var button = document.getElementById('tcf-exam-speech-btn');
+  if(!button) return;
+  button.classList.remove('is-playing');
+  button.setAttribute('aria-label', 'Play current TCF Exam text');
+  var icon = button.querySelector('span');
+  var label = button.querySelector('strong');
+  if(icon) icon.textContent = '▶';
+  if(label) label.textContent = 'Play text';
+}
+
+function stopCurrentTcfExamSpeech(){
+  if(window.speechSynthesis && (window.speechSynthesis.speaking || window.speechSynthesis.pending || window.speechSynthesis.paused)){
+    window.speechSynthesis.cancel();
+  }
+  resetCurrentTcfExamSpeechButton();
+}
+
+function toggleCurrentTcfExamSpeech(event){
+  if(event){
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  if(!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return;
+  var button = document.getElementById('tcf-exam-speech-btn');
+  if(button && button.classList.contains('is-playing')){
+    stopCurrentTcfExamSpeech();
+    return;
+  }
+  var content = getCurrentTcfExamContent();
+  if(!content) return;
+  var readable = content.cloneNode(true);
+  readable.querySelectorAll('button, figcaption, .learning-card-meta').forEach(function(el){ el.remove(); });
+  var text = readable.textContent.replace(/\s+/g, ' ').trim();
+  if(!text) return;
+  window.speechSynthesis.cancel();
+  var utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'fr-FR';
+  utterance.rate = 0.88;
+  utterance.onend = resetCurrentTcfExamSpeechButton;
+  utterance.onerror = resetCurrentTcfExamSpeechButton;
+  if(button){
+    button.classList.add('is-playing');
+    button.setAttribute('aria-label', 'Stop current TCF Exam speech');
+    var icon = button.querySelector('span');
+    var label = button.querySelector('strong');
+    if(icon) icon.textContent = '■';
+    if(label) label.textContent = 'Stop';
+  }
+  window.speechSynthesis.speak(utterance);
+}
+
 function exportSectionToPdf(selector, title, event){
   if(event){
     event.preventDefault();
@@ -7638,6 +7750,7 @@ function exportSectionToPdf(selector, title, event){
   var section = document.querySelector(selector);
   if(!section) return;
   var printable = section.cloneNode(true);
+  printable.removeAttribute('hidden');
   printable.querySelectorAll('details').forEach(function(details){
     details.open = true;
   });

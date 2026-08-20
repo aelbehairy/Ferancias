@@ -59,15 +59,15 @@
   function renderFull(){
     return '<section class="tcf-oral-document" aria-label="Présentation complète">' +
       '<h2>Présentation complète</h2>' +
-      '<div class="tcf-oral-document-grid">' + fullPresentation.map(function(item, index){
-        return '<article class="tcf-oral-topic"><h3><span>' + (index + 1) + '</span>' + escapeHtml(item[0]) + '</h3><p>' + escapeHtml(item[1]) + '</p></article>';
+      '<div class="tcf-oral-document-grid tcf-oral-full-list">' + fullPresentation.map(function(item){
+        return '<article class="tcf-oral-topic tcf-oral-full-row"><h3>' + escapeHtml(item[0]) + '</h3><p>' + escapeHtml(item[1]) + '</p></article>';
       }).join('') + '</div></section>';
   }
 
   function renderQuestions(){
     return '<section class="tcf-oral-document" aria-label="Questions et réponses">' +
       '<h2>Questions et réponses</h2>' +
-      '<div class="tcf-oral-document-grid">' + oralQuestions.map(function(group){
+      '<div class="tcf-oral-document-grid tcf-oral-questions-list">' + oralQuestions.map(function(group){
         return '<article class="tcf-oral-topic"><h3>' + escapeHtml(group[0]) + '</h3>' + group[1].map(function(item){
           return '<div class="tcf-oral-qa"><p><strong>Examinateur :</strong> ' + escapeHtml(item[0]) + '</p><p><strong>Réponse :</strong> ' + escapeHtml(item[1]) + '</p></div>';
         }).join('') + '</article>';
